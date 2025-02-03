@@ -1,19 +1,24 @@
 import glfw
 
 class GLFW:
-    def __init__(self):
+    def __init__(self, height: int = 600, width: int = 800):
         # Инициализация GLFW
         if not glfw.init():
             raise Exception("Не удалось инициализировать GLFW")
         
-        self._create_window()
+        # Установка флага, запрещающего изменение размера окна
+        glfw.window_hint(glfw.RESIZABLE, glfw.FALSE)
+        
+        self._create_window(height, width)
         
         # Установка текущего контекста окна
         glfw.make_context_current(self.window)
         
-    def _create_window(self):
+        self.glfw = glfw
+        
+    def _create_window(self, height, width):
         # Создание окна
-        self.window = glfw.create_window(800, 600, "Мое первое окно на GLFW", None, None)
+        self.window = glfw.create_window(width, height, "Мое первое окно на GLFW", None, None)
 
         if not self.window:
             glfw.terminate()
