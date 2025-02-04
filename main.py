@@ -1,11 +1,11 @@
-from GLFW import GLFW
+from Window import Window
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 
 
 # Создание экземпляра GLFW
-glfw_instance = GLFW(height=650, width=1280)
-glfw = glfw_instance.glfw
+this_window = Window(height=650, width=1280)
+glfw = this_window.glfw
 
 # Настройка OpenGL
 glClearColor(0.1, 0.2, 0.3, 1.0)  # Установка цвета фона (RGBA)
@@ -13,7 +13,7 @@ glEnable(GL_DEPTH_TEST)           # Включение теста глубины
 
 # Основной цикл
 try:
-    while not glfw.window_should_close(glfw_instance.window):
+    while not glfw.window_should_close(this_window.window):
         # Очистка экрана
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
@@ -29,7 +29,7 @@ try:
         glEnd()
 
         # Обновление окна
-        glfw.swap_buffers(glfw_instance.window)
+        glfw.swap_buffers(this_window.window)
         glfw.poll_events()
 finally:
     # Завершение работы GLFW

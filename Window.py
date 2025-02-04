@@ -1,6 +1,6 @@
 import glfw
 
-class GLFW:
+class Window:
     def __init__(self, height: int = 600, width: int = 800):
         # Инициализация GLFW
         if not glfw.init():
@@ -27,7 +27,7 @@ class GLFW:
 
 if __name__ == "__main__":
     # Создание экземпляра GLFW
-    glfw_instance = GLFW()
+    glfw_instance = Window()
 
     # Основной цикл
     try:
