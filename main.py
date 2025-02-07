@@ -88,12 +88,12 @@ class MainStream():
             # Обновление окна
             self.glfw.swap_buffers(self.this_window.window)
             self.glfw.poll_events()
-
-            
+         
     def __del__(self):
         # Очистка
-        glDeleteBuffers(1, [self.vbo])
-        glDeleteVertexArrays(1, [self.vao])
+        glDeleteBuffers(1, np.array([self.vbo], dtype=np.uint32))
+        glDeleteVertexArrays(1, np.array([self.vao], dtype=np.uint32))
+        glDeleteBuffers(1, np.array([self.ebo], dtype=np.uint32))
         self.shader.delete_program()
         self.glfw.terminate()
             
