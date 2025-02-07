@@ -9,6 +9,9 @@ class Shader_manager():
         self.fragment_shader = self._compile_shader(self._fragment_shader, GL_FRAGMENT_SHADER)
         
         self.shader_program = self._create_shader_program(self.vertex_shader, self.fragment_shader)
+        
+        # Используем шейдерную программу
+        glUseProgram(self.shader_program)
 
         
     def _read_shader(self):
@@ -67,7 +70,7 @@ class Shader_manager():
         
         return shader
     
-    def delete_shaders_program(self):
+    def delete_program(self):
         if self.vertex_shader:
             glDeleteShader(self.vertex_shader)
         if self.fragment_shader:
