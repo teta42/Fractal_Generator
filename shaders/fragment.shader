@@ -28,7 +28,7 @@ void main() {
     // Начальное значение z = 0 + 0i
     vec2 z = vec2(0.0);
 
-    int maxIterations = 500;
+    int maxIterations = 300;
     int iteration = 0;
 
     // Итерации: z = z^2 + c
@@ -47,7 +47,7 @@ void main() {
         iteration++;
     }
 
-    // Определение цвета пикселя на основе числа итераций
-    float color = float(iteration) / float(maxIterations);
-    FragColor = vec4(vec3(color), 1.0); // Градиент от чёрного к белому
+    float smoothColor = float(iteration) - log2(log2(dot(z, z))) + 4.0;
+    float color = smoothColor / float(maxIterations);
+    FragColor = vec4(vec3(color), 1.0);
 }

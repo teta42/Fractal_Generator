@@ -4,7 +4,7 @@ from OpenGL.GLUT import *
 from Shader import Shader_manager
 import numpy as np
 
-width, height = 1200, 900
+width, height = 1300, 700
 
 class MainStream():
     def __init__(self):
