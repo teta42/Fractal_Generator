@@ -50,11 +50,11 @@ void main() {
     vec2 pixelCoord = gl_FragCoord.xy / resolution.xy;
 
     // Центр комплексной плоскости (глобальные координаты)
-    QuintupleDouble centerX = makeQuintupleDouble(-1.45);
-    QuintupleDouble centerY = makeQuintupleDouble(0.0);
+    QuintupleDouble centerX = makeQuintupleDouble(-0.25);
+    QuintupleDouble centerY = makeQuintupleDouble(0.75);
 
-    // Экспоненциальный зум
-    QuintupleDouble zoom = makeQuintupleDouble(exp(time * 0.35));
+    // Экспоненциальный зум 
+    QuintupleDouble zoom = makeQuintupleDouble(exp(time * 0.25));
 
     // Соотношение сторон экрана
     QuintupleDouble aspectRatio = makeQuintupleDouble(resolution.x / resolution.y);
@@ -71,7 +71,7 @@ void main() {
     QuintupleDouble zX = makeQuintupleDouble(0.0);
     QuintupleDouble zY = makeQuintupleDouble(0.0);
 
-    int maxIterations = 300;
+    int maxIterations = 200;
     int iteration = 0;
 
     // Итерации: z = z^2 + c
