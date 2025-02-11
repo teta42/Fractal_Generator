@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 uniform vec2 resolution; // Разрешение окна (ширина, высота)
 uniform float time;      // Время в секундах
@@ -8,16 +8,16 @@ out vec4 FragColor;
 
 void main() {
     // Нормализованные координаты пикселя в диапазоне [0, 1]
-    vec2 pixelCoord = gl_FragCoord.xy / resolution;
+    vec2 pixelCoord = vec2(gl_FragCoord.xy) / resolution;
 
     // Центр комплексной плоскости
     vec2 center = vec2(-1.5, 0.0);
 
     // Экспоненциальный зум
-    float zoom = exp(time * 0.15);
+    double zoom = exp(time * 0.55);
 
     // Соотношение сторон экрана
-    float aspectRatio = resolution.x / resolution.y;
+    double aspectRatio = resolution.x / resolution.y;
 
     // Преобразование координат пикселя в относительные координаты
     vec2 scaledCoord = (pixelCoord - 0.5) * vec2(3.0 / zoom * aspectRatio, 3.0 / zoom);
@@ -47,7 +47,7 @@ void main() {
         iteration++;
     }
 
-    float smoothColor = float(iteration) - log2(log2(dot(z, z))) + 4.0;
-    float color = smoothColor / float(maxIterations);
-    FragColor = vec4(vec3(color), 1.0);
+    double smoothColor = double(iteration) - log2(log2(dot(z, z))) + 4.0;
+    double color = smoothColor / double(maxIterations);
+    FragColor = vec4(vec3(float(color)), 1.0);
 }
