@@ -6,41 +6,81 @@ uniform float time;      // Время в секундах
 // Выходной цвет
 out vec4 FragColor;
 
+// Структура для тройной точности
+struct TripleDouble {
+    dvec2 high; // Старшая часть числа
+    dvec2 low;  // Младшая часть числа
+};
+
+// Функция для создания числа с тройной точностью
+TripleDouble makeTripleDouble(double value) {
+    return TripleDouble(dvec2(value, 0.0), dvec2(0.0, 0.0));
+}
+
+// Сложение двух чисел с тройной точностью
+TripleDouble addTripleDouble(TripleDouble a, TripleDouble b) {
+    dvec2 sumHigh = a.high + b.high;
+    dvec2 sumLow = a.low + b.low;
+    return TripleDouble(sumHigh, sumLow);
+}
+
+// Умножение двух чисел с тройной точностью
+TripleDouble mulTripleDouble(TripleDouble a, TripleDouble b) {
+    dvec2 prodHigh = a.high * b.high;
+    dvec2 prodLow = a.low * b.low;
+    return TripleDouble(prodHigh, prodLow);
+}
+
+// Преобразование TripleDouble в dvec2 для вычислений
+dvec2 toDvec2(TripleDouble t) {
+    return t.high + t.low;
+}
+
 void main() {
     // Нормализованные координаты пикселя в диапазоне [0, 1]
     vec2 pixelCoord = gl_FragCoord.xy / resolution.xy;
 
     // Центр комплексной плоскости (глобальные координаты)
-    dvec2 center = dvec2(-1.45, 0.0); // Точка, к которой приближаемся
+    TripleDouble centerX = makeTripleDouble(-1.80);
+    TripleDouble centerY = makeTripleDouble(0.0);
 
     // Экспоненциальный зум
-    double zoom = exp(time * 0.35);
+    TripleDouble zoom = makeTripleDouble(exp(time * 0.45));
 
     // Соотношение сторон экрана
-    double aspectRatio = resolution.x / resolution.y;
+    TripleDouble aspectRatio = makeTripleDouble(resolution.x / resolution.y);
 
     // Преобразование координат пикселя в относительные координаты
-    dvec2 scaledCoord = (dvec2(pixelCoord - 0.5) * dvec2(3.0 / zoom * aspectRatio, 3.0 / zoom));
+    TripleDouble scaledX = mulTripleDouble(makeTripleDouble(pixelCoord.x - 0.5), makeTripleDouble(3.0 / toDvec2(zoom).x * toDvec2(aspectRatio).x));
+    TripleDouble scaledY = mulTripleDouble(makeTripleDouble(pixelCoord.y - 0.5), makeTripleDouble(3.0 / toDvec2(zoom).x));
 
     // Локальные координаты точки на комплексной плоскости
-    dvec2 c = center + scaledCoord;
+    TripleDouble cX = addTripleDouble(centerX, scaledX);
+    TripleDouble cY = addTripleDouble(centerY, scaledY);
 
     // Начальное значение z = 0 + 0i
-    dvec2 z = dvec2(0.0, 0.0);
+    TripleDouble zX = makeTripleDouble(0.0);
+    TripleDouble zY = makeTripleDouble(0.0);
 
-    int maxIterations = 300;
+    int maxIterations = 500;
     int iteration = 0;
 
     // Итерации: z = z^2 + c
     while (iteration < maxIterations) {
         // Вычисление z^2: z^2 = (z.x + i*z.y)^2 = z.x^2 - z.y^2 + 2*z.x*z.y*i
-        dvec2 z2 = dvec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
+        TripleDouble zX2 = mulTripleDouble(zX, zX);
+        TripleDouble zY2 = mulTripleDouble(zY, zY);
+        TripleDouble zXY = mulTripleDouble(zX, zY);
+
+        TripleDouble z2X = addTripleDouble(zX2, makeTripleDouble(-toDvec2(zY2).x));
+        TripleDouble z2Y = makeTripleDouble(2.0 * toDvec2(zXY).x);
 
         // Обновление z: z = z^2 + c
-        z = z2 + c;
+        zX = addTripleDouble(z2X, cX);
+        zY = addTripleDouble(z2Y, cY);
 
         // Проверка на "уход в бесконечность" (если |z| > 2, точка не принадлежит множеству)
-        if (z.x * z.x + z.y * z.y > 4.0) {
+        if (toDvec2(zX).x * toDvec2(zX).x + toDvec2(zY).x * toDvec2(zY).x > 4.0) {
             break;
         }
 
@@ -48,7 +88,7 @@ void main() {
     }
 
     // Плавное окрашивание для более красивого результата
-    float smoothColor = float(iteration) - log2(log2(float(z.x * z.x + z.y * z.y))) + 4.0;
+    float smoothColor = float(iteration) - log2(log2(float(toDvec2(zX).x * toDvec2(zX).x + toDvec2(zY).x * toDvec2(zY).x))) + 4.0;
     float color = smoothColor / float(maxIterations);
 
     // Преобразование цвета в RGB
