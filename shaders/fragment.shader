@@ -8,25 +8,25 @@ out vec4 FragColor;
 
 void main() {
     // Нормализованные координаты пикселя в диапазоне [0, 1]
-    vec2 pixelCoord = vec2(gl_FragCoord.xy) / resolution;
+    vec2 pixelCoord = gl_FragCoord.xy / resolution.xy;
 
-    // Центр комплексной плоскости
-    vec2 center = vec2(-1.5, 0.0);
+    // Центр комплексной плоскости (глобальные координаты)
+    dvec2 center = dvec2(-1.45, 0.0); // Точка, к которой приближаемся
 
     // Экспоненциальный зум
-    double zoom = exp(time * 0.55);
+    double zoom = exp(time * 0.35);
 
     // Соотношение сторон экрана
     double aspectRatio = resolution.x / resolution.y;
 
     // Преобразование координат пикселя в относительные координаты
-    vec2 scaledCoord = (pixelCoord - 0.5) * vec2(3.0 / zoom * aspectRatio, 3.0 / zoom);
+    dvec2 scaledCoord = (dvec2(pixelCoord - 0.5) * dvec2(3.0 / zoom * aspectRatio, 3.0 / zoom));
 
-    // Комплексное число c
-    vec2 c = center + scaledCoord;
+    // Локальные координаты точки на комплексной плоскости
+    dvec2 c = center + scaledCoord;
 
     // Начальное значение z = 0 + 0i
-    vec2 z = vec2(0.0);
+    dvec2 z = dvec2(0.0, 0.0);
 
     int maxIterations = 300;
     int iteration = 0;
@@ -34,20 +34,23 @@ void main() {
     // Итерации: z = z^2 + c
     while (iteration < maxIterations) {
         // Вычисление z^2: z^2 = (z.x + i*z.y)^2 = z.x^2 - z.y^2 + 2*z.x*z.y*i
-        vec2 z2 = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
+        dvec2 z2 = dvec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
 
         // Обновление z: z = z^2 + c
         z = z2 + c;
 
         // Проверка на "уход в бесконечность" (если |z| > 2, точка не принадлежит множеству)
-        if (dot(z, z) > 4.0) {
+        if (z.x * z.x + z.y * z.y > 4.0) {
             break;
         }
 
         iteration++;
     }
 
-    double smoothColor = double(iteration) - log2(log2(dot(z, z))) + 4.0;
-    double color = smoothColor / double(maxIterations);
-    FragColor = vec4(vec3(float(color)), 1.0);
+    // Плавное окрашивание для более красивого результата
+    float smoothColor = float(iteration) - log2(log2(float(z.x * z.x + z.y * z.y))) + 4.0;
+    float color = smoothColor / float(maxIterations);
+
+    // Преобразование цвета в RGB
+    FragColor = vec4(vec3(color), 1.0);
 }
