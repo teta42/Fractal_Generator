@@ -4,7 +4,7 @@ from OpenGL.GLUT import *
 from Shader import Shader_manager
 import numpy as np
 
-width, height = 1800, 900
+width, height = 1920, 1080
 
 class MainStream():
     def __init__(self):
@@ -95,6 +95,7 @@ class MainStream():
         glDeleteVertexArrays(1, np.array([self.vao], dtype=np.uint32))
         glDeleteBuffers(1, np.array([self.ebo], dtype=np.uint32))
         self.shader.delete_program()
+        print(f"Программа работала {self.glfw.get_time()}")
         self.glfw.terminate()
             
 if __name__ == '__main__':

@@ -4,21 +4,22 @@ uniform vec2 resolution; // Разрешение окна (ширина, выс�
 uniform float time;      // Время в секундах
 
 const float ESCAPE_RADIUS = 4.0;
-const float ZOOM_SPEED = 0.25;
+const float ZOOM_SPEED = 0.15;
 const int MAX_ITERATIONS = 200;
+const int MULTIPLE_PRECISION = 10;
 
 // Выходной цвет
 out vec4 FragColor;
 
 // Структура для пятикратной точности
 struct QuintupleDouble {
-    dvec2 parts[5];
+    dvec2 parts[MULTIPLE_PRECISION];
 };
 
 QuintupleDouble makeQuintupleDouble(double value) {
     QuintupleDouble q;
     q.parts[0] = dvec2(value, 0.0);
-    for (int i = 1; i < 5; i++) {
+    for (int i = 1; i < MULTIPLE_PRECISION; i++) {
         q.parts[i] = dvec2(0.0, 0.0);
     }
     return q;
@@ -27,7 +28,7 @@ QuintupleDouble makeQuintupleDouble(double value) {
 // Сложение двух чисел с пятикратной точностью
 QuintupleDouble addQuintupleDouble(QuintupleDouble a, QuintupleDouble b) {
     QuintupleDouble result;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < MULTIPLE_PRECISION; i++) {
         result.parts[i] = a.parts[i] + b.parts[i];
     }
     return result;
@@ -36,7 +37,7 @@ QuintupleDouble addQuintupleDouble(QuintupleDouble a, QuintupleDouble b) {
 // Умножение двух чисел с пятикратной точностью
 QuintupleDouble mulQuintupleDouble(QuintupleDouble a, QuintupleDouble b) {
     QuintupleDouble result;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < MULTIPLE_PRECISION; i++) {
         result.parts[i] = a.parts[i] * b.parts[i];
     }
     return result;
@@ -46,7 +47,7 @@ QuintupleDouble mulQuintupleDouble(QuintupleDouble a, QuintupleDouble b) {
 // Преобразование QuintupleDouble в dvec2 для вычислений
 dvec2 toDvec2(QuintupleDouble q) {
     dvec2 result = dvec2(0.0, 0.0);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < MULTIPLE_PRECISION; i++) {
         result += q.parts[i];
     }
     return result;
@@ -105,8 +106,13 @@ void main() {
         iteration++;
     }
 
-    // Плавное окрашивание для более красивого результата
-    float smoothColor = float(iteration) - log2(log2(float(toDvec2(zX).x * toDvec2(zX).x + toDvec2(zY).x * toDvec2(zY).x))) + 4.0;
+    // Линейная интерполяция вместо логарифмов
+    float magnitude = float(toDvec2(zX).x * toDvec2(zX).x + toDvec2(zY).x * toDvec2(zY).x);
+    float minVal = 0.0; // Минимальное значение для интерполяции
+    float maxVal = ESCAPE_RADIUS; // Максимальное значение для интерполяции
+
+    // Линейная интерполяция
+    float smoothColor = float(iteration) - mix(0.0, 1.0, clamp((magnitude - minVal) / (maxVal - minVal), 0.0, 1.0)) + 4.0;
     float color = smoothColor / float(MAX_ITERATIONS);
 
     // Преобразование цвета в RGB
