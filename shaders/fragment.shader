@@ -1,4 +1,4 @@
-#version 430 core
+#version 330 core
 
 uniform vec2 resolution; // Разрешение окна (ширина, высота)
 uniform float time;      // Время в секундах
@@ -7,7 +7,7 @@ uniform float time;      // Время в секундах
 out vec4 FragColor;
 
 // Центр комплексной плоскости (глобальные координаты)
-dvec2 center = dvec2(-1.55, 0.0); // Точка, к которой приближаемся
+vec2 center = vec2(-1.55, 0.0); // Точка, к которой приближаемся
 
 const float ESCAPE_RADIUS = 4.0;
 const float ZOOM_SPEED = 0.25;
@@ -18,26 +18,26 @@ void main() {
     vec2 pixelCoord = gl_FragCoord.xy / resolution.xy;
 
     // Экспоненциальный зум
-    double zoom = exp(time * ZOOM_SPEED);
+    float zoom = exp(time * ZOOM_SPEED);
 
     // Соотношение сторон экрана
-    double aspectRatio = resolution.x / resolution.y;
+    float aspectRatio = resolution.x / resolution.y;
 
     // Преобразование координат пикселя в относительные координаты
-    dvec2 scaledCoord = (dvec2(pixelCoord - 0.5) * dvec2(3.0 / zoom * aspectRatio, 3.0 / zoom));
+    vec2 scaledCoord = (vec2(pixelCoord - 0.5) * vec2(3.0 / zoom * aspectRatio, 3.0 / zoom));
 
     // Локальные координаты точки на комплексной плоскости
-    dvec2 c = center + scaledCoord;
+    vec2 c = center + scaledCoord;
 
     // Начальное значение z = 0 + 0i
-    dvec2 z = dvec2(0.0, 0.0);
+    vec2 z = vec2(0.0, 0.0);
 
     int iteration = 0;
 
     // Итерации: z = z^2 + c
     while (iteration < MAX_ITERATIONS) {
         // Вычисление z^2: z^2 = (z.x + i*z.y)^2 = z.x^2 - z.y^2 + 2*z.x*z.y*i
-        dvec2 z2 = dvec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
+        vec2 z2 = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
 
         // Обновление z: z = z^2 + c
         z = z2 + c;
@@ -51,7 +51,7 @@ void main() {
     }
 
     // Линейная интерполяция вместо логарифмов
-    float magnitude = float(z.x * z.x + z.y * z.y);
+    float magnitude = z.x * z.x + z.y * z.y;
     float minVal = 0.0; // Минимальное значение для интерполяции
     float maxVal = ESCAPE_RADIUS; // Максимальное значение для интерполяции (ESCAPE_RADIUS)
 
