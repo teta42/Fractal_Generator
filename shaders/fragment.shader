@@ -1,120 +1,70 @@
-#version 430 core
+#version 330 core
 
-uniform vec2 resolution; // Разрешение окна (ширина, высота)
-uniform float time;      // Время в секундах
-
-const float ESCAPE_RADIUS = 4.0;
-const float ZOOM_SPEED = 0.15;
-const int MAX_ITERATIONS = 200;
-const int MULTIPLE_PRECISION = 10;
-
-// Выходной цвет
+// Выходной цвет пикселя
 out vec4 FragColor;
 
-// Структура для пятикратной точности
-struct QuintupleDouble {
-    dvec2 parts[MULTIPLE_PRECISION];
-};
+// Uniform-переменные
+uniform float time; // Время в секундах
 
-QuintupleDouble makeQuintupleDouble(double value) {
-    QuintupleDouble q;
-    q.parts[0] = dvec2(value, 0.0);
-    for (int i = 1; i < MULTIPLE_PRECISION; i++) {
-        q.parts[i] = dvec2(0.0, 0.0);
-    }
-    return q;
+// Параметры фрактала
+const vec2 u_center = vec2(-1.5, 0.0); // Центр окна (cx, cy)
+float u_zoom = exp(time * -0.5);       // Масштаб (чем меньше, тем больше увеличение)
+const int u_maxIter = 500;             // Максимальное количество итераций
+const float u_scale = 1e6;             // Масштаб для фиксированной точки
+const float ESCAPE_RADIUS = 4.0;       // Радиус выхода из множества
+
+// Преобразование в фиксированную точку
+vec2 to_fixed_point(vec2 value, float scale) {
+    return value * scale;
 }
 
-// Сложение двух чисел с пятикратной точностью
-QuintupleDouble addQuintupleDouble(QuintupleDouble a, QuintupleDouble b) {
-    QuintupleDouble result;
-    for (int i = 0; i < MULTIPLE_PRECISION; i++) {
-        result.parts[i] = a.parts[i] + b.parts[i];
-    }
-    return result;
+// Преобразование из фиксированной точки
+vec2 from_fixed_point(vec2 value, float scale) {
+    return value / scale;
 }
 
-// Умножение двух чисел с пятикратной точностью
-QuintupleDouble mulQuintupleDouble(QuintupleDouble a, QuintupleDouble b) {
-    QuintupleDouble result;
-    for (int i = 0; i < MULTIPLE_PRECISION; i++) {
-        result.parts[i] = a.parts[i] * b.parts[i];
-    }
-    return result;
-}
-
-
-// Преобразование QuintupleDouble в dvec2 для вычислений
-dvec2 toDvec2(QuintupleDouble q) {
-    dvec2 result = dvec2(0.0, 0.0);
-    for (int i = 0; i < MULTIPLE_PRECISION; i++) {
-        result += q.parts[i];
-    }
-    return result;
-}
-
-void main() {
-    // Нормализованные координаты пикселя в диапазоне [0, 1]
-    vec2 pixelCoord = gl_FragCoord.xy / resolution.xy;
-
-    // Центр комплексной плоскости (глобальные координаты)
-    QuintupleDouble centerX = makeQuintupleDouble(-1.55);
-    QuintupleDouble centerY = makeQuintupleDouble(0.0);
-
-    // Экспоненциальный зум 
-    QuintupleDouble zoom = makeQuintupleDouble(exp(time * ZOOM_SPEED));
-
-    // Соотношение сторон экрана
-    QuintupleDouble aspectRatio = makeQuintupleDouble(resolution.x / resolution.y);
-
-    // Преобразование координат пикселя в относительные координаты
-    QuintupleDouble scaledX = mulQuintupleDouble(makeQuintupleDouble(pixelCoord.x - 0.5), makeQuintupleDouble(3.0 / toDvec2(zoom).x * toDvec2(aspectRatio).x));
-    QuintupleDouble scaledY = mulQuintupleDouble(makeQuintupleDouble(pixelCoord.y - 0.5), makeQuintupleDouble(3.0 / toDvec2(zoom).x));
-
-    // Локальные координаты точки на комплексной плоскости
-    QuintupleDouble cX = addQuintupleDouble(centerX, scaledX);
-    QuintupleDouble cY = addQuintupleDouble(centerY, scaledY);
-
-    // Начальное значение z = 0 + 0i
-    QuintupleDouble zX = makeQuintupleDouble(0.0);
-    QuintupleDouble zY = makeQuintupleDouble(0.0);
-
+// Функция для вычисления множества Мандельброта с линейной интерполяцией
+float mandelbrot(vec2 c) {
+    vec2 z = vec2(0.0, 0.0); // Начальное значение z = 0
     int iteration = 0;
 
     // Итерации: z = z^2 + c
-    while (iteration < MAX_ITERATIONS) {
-        // Вычисление z^2: z^2 = (z.x + i*z.y)^2 = z.x^2 - z.y^2 + 2*z.x*z.y*i
-        QuintupleDouble zX2 = mulQuintupleDouble(zX, zX);
-        QuintupleDouble zY2 = mulQuintupleDouble(zY, zY);
-        QuintupleDouble zXY = mulQuintupleDouble(zX, zY);
-
-        QuintupleDouble z2X = addQuintupleDouble(zX2, makeQuintupleDouble(-toDvec2(zY2).x));
-        QuintupleDouble z2Y = makeQuintupleDouble(2.0 * toDvec2(zXY).x);
-
-        // Обновление z: z = z^2 + c
-        zX = addQuintupleDouble(z2X, cX);
-        zY = addQuintupleDouble(z2Y, cY);
-
-        // Единичное преобразование а не так - (toDvec2(zX).x * toDvec2(zX).x + toDvec2(zY).x * toDvec2(zY).x > 4.0)
-        // dvec2 zX_dvec2 = toDvec2(zX);
-        // dvec2 zY_dvec2 = toDvec2(zY);
-
-        if (toDvec2(zX2).x + toDvec2(zY2).x > ESCAPE_RADIUS) {
-            break;
-        }
-
+    while (dot(z, z) <= ESCAPE_RADIUS && iteration < u_maxIter) {
+        // z^2 = (x + yi)^2 = (x^2 - y^2) + 2xyi
+        float x = z.x * z.x - z.y * z.y + c.x;
+        float y = 2.0 * z.x * z.y + c.y;
+        z = vec2(x, y);
         iteration++;
     }
 
-    // Линейная интерполяция вместо логарифмов
-    float magnitude = float(toDvec2(zX).x * toDvec2(zX).x + toDvec2(zY).x * toDvec2(zY).x);
-    float minVal = 0.0; // Минимальное значение для интерполяции
+    // Линейная интерполяция для сглаживания цвета
+    float magnitude = dot(z, z); // Квадрат модуля z
+    float minVal = 0.0;          // Минимальное значение для интерполяции
     float maxVal = ESCAPE_RADIUS; // Максимальное значение для интерполяции
 
     // Линейная интерполяция
     float smoothColor = float(iteration) - mix(0.0, 1.0, clamp((magnitude - minVal) / (maxVal - minVal), 0.0, 1.0)) + 4.0;
-    float color = smoothColor / float(MAX_ITERATIONS);
 
-    // Преобразование цвета в RGB
-    FragColor = vec4(vec3(color), 1.0);
+    return smoothColor;
+}
+
+void main() {
+    // Преобразование координат пикселя в локальную систему координат
+    vec2 fragCoord = gl_FragCoord.xy; // Координаты текущего пикселя
+    vec2 resolution = vec2(800.0, 600.0); // Разрешение экрана (замените на ваше)
+    vec2 localCoord = (fragCoord / resolution - 0.5) * u_zoom;
+
+    // Преобразование в глобальные координаты фрактала
+    vec2 c = u_center + localCoord;
+
+    // Применение фиксированной точки
+    vec2 c_fixed = to_fixed_point(c, u_scale);
+    c = from_fixed_point(c_fixed, u_scale);
+
+    // Вычисление множества Мандельброта с интерполяцией
+    float smoothColor = mandelbrot(c);
+
+    // Нормализация сглаженного цвета
+    float color = smoothColor / float(u_maxIter);
+    FragColor = vec4(vec3(color), 1.0); // Градиент от черного к белому
 }
