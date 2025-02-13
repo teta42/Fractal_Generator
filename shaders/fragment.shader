@@ -1,70 +1,64 @@
-#version 330 core
+#version 430 core
 
-// Выходной цвет пикселя
+uniform vec2 resolution; // Разрешение окна (ширина, высота)
+uniform float time;      // Время в секундах
+
+// Выходной цвет
 out vec4 FragColor;
 
-// Uniform-переменные
-uniform float time; // Время в секундах
+// Центр комплексной плоскости (глобальные координаты)
+dvec2 center = dvec2(-1.55, 0.0); // Точка, к которой приближаемся
 
-// Параметры фрактала
-const vec2 u_center = vec2(-1.5, 0.0); // Центр окна (cx, cy)
-float u_zoom = exp(time * -0.5);       // Масштаб (чем меньше, тем больше увеличение)
-const int u_maxIter = 500;             // Максимальное количество итераций
-const float u_scale = 1e6;             // Масштаб для фиксированной точки
-const float ESCAPE_RADIUS = 4.0;       // Радиус выхода из множества
+const float ESCAPE_RADIUS = 4.0;
+const float ZOOM_SPEED = 0.25;
+const int MAX_ITERATIONS = 500;
 
-// Преобразование в фиксированную точку
-vec2 to_fixed_point(vec2 value, float scale) {
-    return value * scale;
-}
+void main() {
+    // Нормализованные координаты пикселя в диапазоне [0, 1]
+    vec2 pixelCoord = gl_FragCoord.xy / resolution.xy;
 
-// Преобразование из фиксированной точки
-vec2 from_fixed_point(vec2 value, float scale) {
-    return value / scale;
-}
+    // Экспоненциальный зум
+    double zoom = exp(time * ZOOM_SPEED);
 
-// Функция для вычисления множества Мандельброта с линейной интерполяцией
-float mandelbrot(vec2 c) {
-    vec2 z = vec2(0.0, 0.0); // Начальное значение z = 0
+    // Соотношение сторон экрана
+    double aspectRatio = resolution.x / resolution.y;
+
+    // Преобразование координат пикселя в относительные координаты
+    dvec2 scaledCoord = (dvec2(pixelCoord - 0.5) * dvec2(3.0 / zoom * aspectRatio, 3.0 / zoom));
+
+    // Локальные координаты точки на комплексной плоскости
+    dvec2 c = center + scaledCoord;
+
+    // Начальное значение z = 0 + 0i
+    dvec2 z = dvec2(0.0, 0.0);
+
     int iteration = 0;
 
     // Итерации: z = z^2 + c
-    while (dot(z, z) <= ESCAPE_RADIUS && iteration < u_maxIter) {
-        // z^2 = (x + yi)^2 = (x^2 - y^2) + 2xyi
-        float x = z.x * z.x - z.y * z.y + c.x;
-        float y = 2.0 * z.x * z.y + c.y;
-        z = vec2(x, y);
+    while (iteration < MAX_ITERATIONS) {
+        // Вычисление z^2: z^2 = (z.x + i*z.y)^2 = z.x^2 - z.y^2 + 2*z.x*z.y*i
+        dvec2 z2 = dvec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
+
+        // Обновление z: z = z^2 + c
+        z = z2 + c;
+
+        // Проверка на "уход в бесконечность" (если |z| > 2, точка не принадлежит множеству)
+        if (z.x * z.x + z.y * z.y > ESCAPE_RADIUS) {
+            break;
+        }
+
         iteration++;
     }
 
-    // Линейная интерполяция для сглаживания цвета
-    float magnitude = dot(z, z); // Квадрат модуля z
-    float minVal = 0.0;          // Минимальное значение для интерполяции
-    float maxVal = ESCAPE_RADIUS; // Максимальное значение для интерполяции
+    // Линейная интерполяция вместо логарифмов
+    float magnitude = float(z.x * z.x + z.y * z.y);
+    float minVal = 0.0; // Минимальное значение для интерполяции
+    float maxVal = ESCAPE_RADIUS; // Максимальное значение для интерполяции (ESCAPE_RADIUS)
 
     // Линейная интерполяция
     float smoothColor = float(iteration) - mix(0.0, 1.0, clamp((magnitude - minVal) / (maxVal - minVal), 0.0, 1.0)) + 4.0;
+    float color = smoothColor / float(MAX_ITERATIONS);
 
-    return smoothColor;
-}
-
-void main() {
-    // Преобразование координат пикселя в локальную систему координат
-    vec2 fragCoord = gl_FragCoord.xy; // Координаты текущего пикселя
-    vec2 resolution = vec2(800.0, 600.0); // Разрешение экрана (замените на ваше)
-    vec2 localCoord = (fragCoord / resolution - 0.5) * u_zoom;
-
-    // Преобразование в глобальные координаты фрактала
-    vec2 c = u_center + localCoord;
-
-    // Применение фиксированной точки
-    vec2 c_fixed = to_fixed_point(c, u_scale);
-    c = from_fixed_point(c_fixed, u_scale);
-
-    // Вычисление множества Мандельброта с интерполяцией
-    float smoothColor = mandelbrot(c);
-
-    // Нормализация сглаженного цвета
-    float color = smoothColor / float(u_maxIter);
-    FragColor = vec4(vec3(color), 1.0); // Градиент от черного к белому
+    // Преобразование цвета в RGB
+    FragColor = vec4(vec3(color), 1.0);
 }
