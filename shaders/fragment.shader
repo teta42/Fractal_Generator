@@ -60,5 +60,5 @@ void main() {
     float color = smoothColor / float(MAX_ITERATIONS);
 
     // Преобразование цвета в RGB
-    FragColor = vec4(vec3(color), 1.0);
+    FragColor = vec4(vec3(color, color-1, color-1), 1.0);
 }
