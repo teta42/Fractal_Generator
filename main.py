@@ -4,12 +4,12 @@ from OpenGL.GLUT import *
 from Shader import Shader_manager
 import numpy as np
 
-width, height = 800, 600
+# width, height = 800, 600
 
 class MainStream():
     def __init__(self):
         # Создание экземпляра GLFW
-        self.this_window = Window(height=height, width=width)
+        self.this_window = Window()
         self.glfw = self.this_window.glfw
 
         self.shader = Shader_manager()
@@ -63,6 +63,8 @@ class MainStream():
         # Получение локаций uniform-переменных
         resolution = glGetUniformLocation(self.shader.shader_program, "resolution")
         time_s = glGetUniformLocation(self.shader.shader_program, "time")
+        
+        width, height = self.glfw.get_window_size(self.this_window.window)
 
         # Основной цикл
         while not self.glfw.window_should_close(self.this_window.window):

@@ -1,4 +1,5 @@
 import glfw
+from OpenGL.GL import glViewport
 
 class Window:
     def __init__(self, height: int = 600, width: int = 800):
@@ -7,12 +8,14 @@ class Window:
             raise Exception("Не удалось инициализировать GLFW")
         
         # Установка флага, запрещающего изменение размера окна
-        glfw.window_hint(glfw.RESIZABLE, glfw.FALSE)
+        glfw.window_hint(glfw.RESIZABLE, glfw.TRUE)
         
         self._create_window(height, width)
         
         # Установка текущего контекста окна
         glfw.make_context_current(self.window)
+        
+        glfw.set_framebuffer_size_callback(self.window, self.framebuffer_size_callback)
         
         self.glfw = glfw
         
@@ -23,6 +26,11 @@ class Window:
         if not self.window:
             glfw.terminate()
             raise Exception("Не удалось создать окно GLFW")
+        
+    def framebuffer_size_callback(self, window, width, height):
+        # Обновляем область отображения OpenGL
+        glViewport(0, 0, width, height)
+
 
 
 if __name__ == "__main__":
