@@ -37,7 +37,7 @@ void main() {
     double zSquared = 0.0; // Квадрат модуля z
     while (iteration < MAX_ITERATIONS) {
         // Вычисление z^2 + c
-        z = vec2(z.x * z.x - z.y * z.y + c.x, 2.0 * z.x * z.y + c.y);
+        z = dvec2(z.x * z.x - z.y * z.y + c.x, 2.0 * z.x * z.y + c.y);
 
         // Обновление квадрата модуля z
         zSquared = z.x * z.x + z.y * z.y;
@@ -56,7 +56,7 @@ void main() {
     float maxVal = ESCAPE_RADIUS; // Максимальное значение для интерполяции (ESCAPE_RADIUS)
 
     // Линейная интерполяция
-    double smoothColor = float(iteration) - clamp((magnitude - minVal) / (maxVal - minVal), 0.0, 1.0) + 4.0;
+    double smoothColor = double(iteration) - clamp((magnitude - minVal) / (maxVal - minVal), 0.0, 1.0) + 4.0;
     double color = smoothColor / double(MAX_ITERATIONS);
 
     // Преобразование цвета в RGB
