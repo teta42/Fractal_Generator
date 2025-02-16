@@ -34,16 +34,16 @@ void main() {
 
     int iteration = 0;
 
-    // Итерации: z = z^2 + c
+    double zSquared = 0.0; // Квадрат модуля z
     while (iteration < MAX_ITERATIONS) {
-        // Вычисление z^2: z^2 = (z.x + i*z.y)^2 = z.x^2 - z.y^2 + 2*z.x*z.y*i
-        dvec2 z2 = dvec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
+        // Вычисление z^2 + c
+        z = vec2(z.x * z.x - z.y * z.y + c.x, 2.0 * z.x * z.y + c.y);
 
-        // Обновление z: z = z^2 + c
-        z = z2 + c;
+        // Обновление квадрата модуля z
+        zSquared = z.x * z.x + z.y * z.y;
 
-        // Проверка на "уход в бесконечность" (если |z| > 2, точка не принадлежит множеству)
-        if (z.x * z.x + z.y * z.y > ESCAPE_RADIUS) {
+        // Проверка на "уход в бесконечность"
+        if (zSquared > ESCAPE_RADIUS) {
             break;
         }
 
@@ -51,14 +51,14 @@ void main() {
     }
 
     // Линейная интерполяция вместо логарифмов
-    float magnitude = float(z.x * z.x + z.y * z.y);
+    double magnitude = zSquared;
     float minVal = 0.0; // Минимальное значение для интерполяции
     float maxVal = ESCAPE_RADIUS; // Максимальное значение для интерполяции (ESCAPE_RADIUS)
 
     // Линейная интерполяция
-    float smoothColor = float(iteration) - mix(0.0, 1.0, clamp((magnitude - minVal) / (maxVal - minVal), 0.0, 1.0)) + 4.0;
-    float color = smoothColor / float(MAX_ITERATIONS);
+    double smoothColor = float(iteration) - clamp((magnitude - minVal) / (maxVal - minVal), 0.0, 1.0) + 4.0;
+    double color = smoothColor / double(MAX_ITERATIONS);
 
     // Преобразование цвета в RGB
-    FragColor = vec4(vec3(color, color-1, color-1), 1.0);
+    FragColor = vec4(vec3(color), 1.0);
 }
