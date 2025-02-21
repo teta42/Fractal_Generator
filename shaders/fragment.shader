@@ -6,11 +6,11 @@ uniform double zoom;  // Экспоненциальный зум
 // Центр комплексной плоскости (глобальные координаты)
 uniform dvec2 center; // Точка, к которой приближаемся
 
+uniform float ESCAPE_RADIUS;
+uniform int MAX_ITERATIONS;
+
 // Выходной цвет
 out vec4 FragColor;
-
-const float ESCAPE_RADIUS = 4.0;
-const int MAX_ITERATIONS = 200;
 
 void main() {
     // Нормализованные координаты пикселя в диапазоне [0, 1]

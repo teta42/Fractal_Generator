@@ -8,8 +8,10 @@ import glfw
 
 # width, height = 800, 600
 
-ZOOM_SPEED = 0.15 # чем ближе к 1 тем быстрее
+ZOOM_SPEED = 0.25 # чем ближе к 1 тем быстрее
 CENTER = {'x': 0.0, 'y': 0.0}
+MAX_ITERATIONS = 500
+ESCAPE_RADIUS = 4.0
 
 # Функция обратного вызова для обработки событий мыши
 def mouse_callback(window, button, action, mods):
@@ -83,6 +85,8 @@ class MainStream():
         resolution = glGetUniformLocation(self.shader.shader_program, "resolution")
         zoom = glGetUniformLocation(self.shader.shader_program, "zoom")
         center = glGetUniformLocation(self.shader.shader_program, "center")
+        max_itr = glGetUniformLocation(self.shader.shader_program, "MAX_ITERATIONS")
+        escape_radius = glGetUniformLocation(self.shader.shader_program, "ESCAPE_RADIUS")
         # time_s = glGetUniformLocation(self.shader.shader_program, "time")
         
         width, height = glfw.get_window_size(window)
@@ -99,6 +103,8 @@ class MainStream():
             glUniform2f(resolution, width, height)
             glUniform1d(zoom, exp(glfw.get_time()*ZOOM_SPEED))
             glUniform2d(center, CENTER['x'], CENTER['y'])
+            glUniform1i(max_itr, MAX_ITERATIONS)
+            glUniform1f(escape_radius, ESCAPE_RADIUS)
             # glUniform1f(time_s, glfw.get_time())
 
             # Привязка VAO
