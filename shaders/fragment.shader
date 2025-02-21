@@ -1,7 +1,8 @@
 #version 430 core
 
 uniform vec2 resolution; // Разрешение окна (ширина, высота)
-uniform float time;      // Время в секундах
+// uniform float time;      // Время в секундах
+uniform double zoom;  // Экспоненциальный зум
 
 // Выходной цвет
 out vec4 FragColor;
@@ -10,15 +11,11 @@ out vec4 FragColor;
 dvec2 center = dvec2(-1.55, 0.0); // Точка, к которой приближаемся
 
 const float ESCAPE_RADIUS = 4.0;
-const float ZOOM_SPEED = 0.25;
 const int MAX_ITERATIONS = 200;
 
 void main() {
     // Нормализованные координаты пикселя в диапазоне [0, 1]
     dvec2 pixelCoord = gl_FragCoord.xy / resolution.xy;
-
-    // Экспоненциальный зум
-    double zoom = exp(time * ZOOM_SPEED);
 
     // Соотношение сторон экрана
     double aspectRatio = resolution.x / resolution.y;

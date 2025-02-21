@@ -3,14 +3,18 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from Shader import Shader_manager
 import numpy as np
+from key import key_callback
+from math import exp
+import glfw
 
 # width, height = 800, 600
+
+ZOOM_SPEED = 0.99 # чем ближе к 1 тем быстрее
 
 class MainStream():
     def __init__(self):
         # Создание экземпляра GLFW
         self.this_window = Window()
-        self.glfw = self.this_window.glfw
 
         self.shader = Shader_manager()
         
@@ -60,20 +64,26 @@ class MainStream():
         glBindVertexArray(0)
         
     def _flow(self):
+        window = self.this_window.window
         # Получение локаций uniform-переменных
         resolution = glGetUniformLocation(self.shader.shader_program, "resolution")
-        time_s = glGetUniformLocation(self.shader.shader_program, "time")
+        zoom = glGetUniformLocation(self.shader.shader_program, "zoom")
+        # time_s = glGetUniformLocation(self.shader.shader_program, "time")
         
-        width, height = self.glfw.get_window_size(self.this_window.window)
+        width, height = glfw.get_window_size(window)
+        
+        # Регистрация функции обратного вызова
+        glfw.set_key_callback(window, key_callback)
 
         # Основной цикл
-        while not self.glfw.window_should_close(self.this_window.window):
+        while not glfw.window_should_close(window):
             # Очистка экрана
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
             # Установка значений uniform-переменных
             glUniform2f(resolution, width, height)
-            glUniform1f(time_s, self.glfw.get_time())
+            glUniform1d(zoom, exp(glfw.get_time()*ZOOM_SPEED))
+            # glUniform1f(time_s, glfw.get_time())
 
             # Привязка VAO
             glBindVertexArray(self.vao)
@@ -88,8 +98,8 @@ class MainStream():
             self._check_gl_error()
 
             # Обновление окна
-            self.glfw.swap_buffers(self.this_window.window)
-            self.glfw.poll_events()
+            glfw.swap_buffers(window)
+            glfw.poll_events()
          
     def __del__(self):
         # Очистка
@@ -97,8 +107,8 @@ class MainStream():
         glDeleteVertexArrays(1, np.array([self.vao], dtype=np.uint32))
         glDeleteBuffers(1, np.array([self.ebo], dtype=np.uint32))
         self.shader.delete_program()
-        print(f"Программа работала {self.glfw.get_time()}")
-        self.glfw.terminate()
+        print(f"Программа работала {glfw.get_time()}")
+        glfw.terminate()
             
 if __name__ == '__main__':
     stream = MainStream()
