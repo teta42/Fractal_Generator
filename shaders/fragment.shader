@@ -1,14 +1,13 @@
 #version 430 core
 
 uniform vec2 resolution; // Разрешение окна (ширина, высота)
-// uniform float time;      // Время в секундах
+uniform float time;      // Время в секундах
 uniform double zoom;  // Экспоненциальный зум
+// Центр комплексной плоскости (глобальные координаты)
+uniform dvec2 center; // Точка, к которой приближаемся
 
 // Выходной цвет
 out vec4 FragColor;
-
-// Центр комплексной плоскости (глобальные координаты)
-dvec2 center = dvec2(-1.55, 0.0); // Точка, к которой приближаемся
 
 const float ESCAPE_RADIUS = 4.0;
 const int MAX_ITERATIONS = 200;

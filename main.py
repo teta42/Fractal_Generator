@@ -3,13 +3,27 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from Shader import Shader_manager
 import numpy as np
-from key import key_callback
 from math import exp
 import glfw
 
 # width, height = 800, 600
 
-ZOOM_SPEED = 0.99 # чем ближе к 1 тем быстрее
+ZOOM_SPEED = 0.15 # чем ближе к 1 тем быстрее
+CENTER = {'x': 0.0, 'y': 0.0}
+
+# Функция обратного вызова для обработки событий мыши
+def mouse_callback(window, button, action, mods):
+    if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS:
+        # Получаем координаты курсора в пикселях
+        x, y = glfw.get_cursor_pos(window)
+        width, height = glfw.get_window_size(window)
+
+        zoom = exp(glfw.get_time()*ZOOM_SPEED)
+
+        CENTER['x'] = CENTER['x'] + (x / width - 0.5) * (3.0 * (width/height) / zoom)
+        CENTER['y'] = CENTER['y'] + (0.5 - y / height) * (3.0 / zoom)
+
+        print(f"Новый центр комплексной плоскости: x={CENTER['x']}, y={CENTER['y']}")
 
 class MainStream():
     def __init__(self):
@@ -68,12 +82,13 @@ class MainStream():
         # Получение локаций uniform-переменных
         resolution = glGetUniformLocation(self.shader.shader_program, "resolution")
         zoom = glGetUniformLocation(self.shader.shader_program, "zoom")
+        center = glGetUniformLocation(self.shader.shader_program, "center")
         # time_s = glGetUniformLocation(self.shader.shader_program, "time")
         
         width, height = glfw.get_window_size(window)
         
         # Регистрация функции обратного вызова
-        glfw.set_key_callback(window, key_callback)
+        glfw.set_mouse_button_callback(window, mouse_callback)
 
         # Основной цикл
         while not glfw.window_should_close(window):
@@ -83,6 +98,7 @@ class MainStream():
             # Установка значений uniform-переменных
             glUniform2f(resolution, width, height)
             glUniform1d(zoom, exp(glfw.get_time()*ZOOM_SPEED))
+            glUniform2d(center, CENTER['x'], CENTER['y'])
             # glUniform1f(time_s, glfw.get_time())
 
             # Привязка VAO
