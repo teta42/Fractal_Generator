@@ -10,8 +10,9 @@ import glfw
 
 ZOOM_SPEED = 0.25 # чем ближе к 1 тем быстрее
 CENTER = {'x': 0.0, 'y': 0.0}
-MAX_ITERATIONS = 500
+MAX_ITERATIONS = 200
 ESCAPE_RADIUS = 4.0
+
 
 # Функция обратного вызова для обработки событий мыши
 def mouse_callback(window, button, action, mods):
