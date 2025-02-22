@@ -8,10 +8,13 @@ import glfw
 
 # width, height = 800, 600
 
-ZOOM_SPEED = 0.25 # чем ближе к 1 тем быстрее
+ZOOM_SPEED = 0.05 # чем ближе к 1 тем быстрее
+ZOOM = 0.0
 CENTER = {'x': 0.0, 'y': 0.0}
 MAX_ITERATIONS = 200
 ESCAPE_RADIUS = 4.0
+
+WINDOW = None
 
 
 # Функция обратного вызова для обработки событий мыши
@@ -19,12 +22,10 @@ def mouse_callback(window, button, action, mods):
     if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS:
         # Получаем координаты курсора в пикселях
         x, y = glfw.get_cursor_pos(window)
-        width, height = glfw.get_window_size(window)
+        width, height = WINDOW.window_size
 
-        zoom = exp(glfw.get_time()*ZOOM_SPEED)
-
-        CENTER['x'] = CENTER['x'] + (x / width - 0.5) * (3.0 * (width/height) / zoom)
-        CENTER['y'] = CENTER['y'] + (0.5 - y / height) * (3.0 / zoom)
+        CENTER['x'] = CENTER['x'] + (x / width - 0.5) * (3.0 * (width/height) / ZOOM)
+        CENTER['y'] = CENTER['y'] + (0.5 - y / height) * (3.0 / ZOOM)
 
         print(f"Новый центр комплексной плоскости: x={CENTER['x']}, y={CENTER['y']}")
 
@@ -32,6 +33,9 @@ class MainStream():
     def __init__(self):
         # Создание экземпляра GLFW
         self.this_window = Window()
+        
+        global WINDOW
+        WINDOW = self.this_window
 
         self.shader = Shader_manager()
         
@@ -90,8 +94,6 @@ class MainStream():
         escape_radius = glGetUniformLocation(self.shader.shader_program, "ESCAPE_RADIUS")
         # time_s = glGetUniformLocation(self.shader.shader_program, "time")
         
-        width, height = glfw.get_window_size(window)
-        
         # Регистрация функции обратного вызова
         glfw.set_mouse_button_callback(window, mouse_callback)
 
@@ -100,9 +102,14 @@ class MainStream():
             # Очистка экрана
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+            global ZOOM
+            ZOOM = exp(glfw.get_time()*ZOOM_SPEED)
+
+            width, height = self.this_window.window_size
+
             # Установка значений uniform-переменных
             glUniform2f(resolution, width, height)
-            glUniform1d(zoom, exp(glfw.get_time()*ZOOM_SPEED))
+            glUniform1d(zoom, ZOOM)
             glUniform2d(center, CENTER['x'], CENTER['y'])
             glUniform1i(max_itr, MAX_ITERATIONS)
             glUniform1f(escape_radius, ESCAPE_RADIUS)

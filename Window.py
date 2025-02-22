@@ -7,7 +7,7 @@ class Window:
         if not glfw.init():
             raise Exception("Не удалось инициализировать GLFW")
         
-        # Установка флага, запрещающего изменение размера окна
+        # Установка флага, не запрещающего изменение размера окна
         glfw.window_hint(glfw.RESIZABLE, glfw.TRUE)
         
         self._create_window(height, width)
@@ -15,7 +15,10 @@ class Window:
         # Установка текущего контекста окна
         glfw.make_context_current(self.window)
         
-        glfw.set_framebuffer_size_callback(self.window, self.framebuffer_size_callback)
+        glfw.set_framebuffer_size_callback(self.window, self._framebuffer_size_callback)
+        
+        self.new_height = height
+        self.new_width = width
         
         self.glfw = glfw
         
@@ -27,7 +30,13 @@ class Window:
             glfw.terminate()
             raise Exception("Не удалось создать окно GLFW")
         
-    def framebuffer_size_callback(self, window, width, height):
+    @property
+    def window_size(self):
+        return self.new_width, self.new_height
+        
+    def _framebuffer_size_callback(self, window, width, height):
+        self.new_height = height
+        self.new_width = width
         # Обновляем область отображения OpenGL
         glViewport(0, 0, width, height)
 
