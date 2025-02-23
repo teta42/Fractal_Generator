@@ -94,13 +94,8 @@ class MainStream():
         
     def _flow(self):
         window = self.this_window.window
-        # Получение локаций uniform-переменных
-        resolution = glGetUniformLocation(self.shader.shader_program, "resolution")
-        zoom = glGetUniformLocation(self.shader.shader_program, "zoom")
-        center = glGetUniformLocation(self.shader.shader_program, "center")
-        max_itr = glGetUniformLocation(self.shader.shader_program, "MAX_ITERATIONS")
-        escape_radius = glGetUniformLocation(self.shader.shader_program, "ESCAPE_RADIUS")
-        # time_s = glGetUniformLocation(self.shader.shader_program, "time")
+        
+        self.shader.get_uniform()
         
         # Регистрация функции обратного вызова
         glfw.set_mouse_button_callback(window, mouse_callback)
@@ -112,18 +107,12 @@ class MainStream():
             # Очистка экрана
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-            global ZOOM
+            # global ZOOM
             # ZOOM = ZOOM_SPEED  # exp(glfw.get_time()*ZOOM_SPEED)
 
             width, height = self.this_window.window_size
 
-            # Установка значений uniform-переменных
-            glUniform2f(resolution, width, height)
-            glUniform1d(zoom, ZOOM)
-            glUniform2d(center, CENTER['x'], CENTER['y'])
-            glUniform1i(max_itr, MAX_ITERATIONS)
-            glUniform1f(escape_radius, ESCAPE_RADIUS)
-            # glUniform1f(time_s, glfw.get_time())
+            self.shader.push_uniform(ZOOM, CENTER, MAX_ITERATIONS, ESCAPE_RADIUS, width, height)
 
             # Привязка VAO
             glBindVertexArray(self.vao)

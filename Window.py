@@ -41,7 +41,6 @@ class Window:
         glViewport(0, 0, width, height)
 
 
-
 if __name__ == "__main__":
     # Создание экземпляра GLFW
     glfw_instance = Window()

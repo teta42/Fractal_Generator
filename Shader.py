@@ -12,8 +12,7 @@ class Shader_manager():
         
         # Используем шейдерную программу
         glUseProgram(self.shader_program)
-
-        
+    
     def _read_shader(self):
         vertex_path = '../Fractal_Generator/shaders/vertex.shader'
         fragment_path = '../Fractal_Generator/shaders/fragment.shader'
@@ -69,6 +68,24 @@ class Shader_manager():
             raise RuntimeError(f"Ошибка компиляции шейдера: {error_log}")
         
         return shader
+    
+    def get_uniform(self):
+        # Получение локаций uniform-переменных
+        self.resolution = glGetUniformLocation(self.shader_program, "resolution")
+        self.zoom = glGetUniformLocation(self.shader_program, "zoom")
+        self.center = glGetUniformLocation(self.shader_program, "center")
+        self.max_itr = glGetUniformLocation(self.shader_program, "MAX_ITERATIONS")
+        self.escape_radius = glGetUniformLocation(self.shader_program, "ESCAPE_RADIUS")
+        # time_s = glGetUniformLocation(self.shader_program, "time")
+
+    def push_uniform(self, ZOOM, CENTER, MAX_ITERATIONS, ESCAPE_RADIUS, width, height):
+        # Установка значений uniform-переменных
+        glUniform2f(self.resolution, width, height)
+        glUniform1d(self.zoom, ZOOM)
+        glUniform2d(self.center, CENTER['x'], CENTER['y'])
+        glUniform1i(self.max_itr, MAX_ITERATIONS)
+        glUniform1f(self.escape_radius, ESCAPE_RADIUS)
+        # glUniform1f(time_s, glfw.get_time())
     
     def delete_program(self):
         if self.vertex_shader:
