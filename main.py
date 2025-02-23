@@ -8,10 +8,10 @@ import glfw
 
 # width, height = 800, 600
 
-ZOOM_SPEED = 0.05 # чем ближе к 1 тем быстрее
-ZOOM = 0.0
+# ZOOM_SPEED = 1.0 # чем ближе к 1 тем быстрее
+ZOOM = 1.0
 CENTER = {'x': 0.0, 'y': 0.0}
-MAX_ITERATIONS = 200
+MAX_ITERATIONS = 500
 ESCAPE_RADIUS = 4.0
 
 WINDOW = None
@@ -28,6 +28,14 @@ def mouse_callback(window, button, action, mods):
         CENTER['y'] = CENTER['y'] + (0.5 - y / height) * (3.0 / ZOOM)
 
         print(f"Новый центр комплексной плоскости: x={CENTER['x']}, y={CENTER['y']}")
+
+# Функция обратного вызова для обработки прокрутки
+def scroll_callback(window, xoffset, yoffset):
+    global ZOOM
+    # Нормализуем значение прокрутки
+    ZOOM += yoffset * 0.3 * ZOOM  # Умножаем на коэффициент для уменьшения шага
+    # ZOOM_SPEED = max(-1.0, min(1.0, ZOOM_SPEED))  # Ограничиваем значения между 0 и 1
+    print(f"Текущее значение прокрутки: {ZOOM}")
 
 class MainStream():
     def __init__(self):
@@ -96,6 +104,8 @@ class MainStream():
         
         # Регистрация функции обратного вызова
         glfw.set_mouse_button_callback(window, mouse_callback)
+        # Установка функции обратного вызова для прокрутки
+        glfw.set_scroll_callback(window, scroll_callback)
 
         # Основной цикл
         while not glfw.window_should_close(window):
@@ -103,7 +113,7 @@ class MainStream():
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
             global ZOOM
-            ZOOM = exp(glfw.get_time()*ZOOM_SPEED)
+            # ZOOM = ZOOM_SPEED  # exp(glfw.get_time()*ZOOM_SPEED)
 
             width, height = self.this_window.window_size
 
