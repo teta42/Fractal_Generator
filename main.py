@@ -107,7 +107,7 @@ class MainStream():
             # Очистка экрана
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-            # global ZOOM
+            #global ZOOM
             # ZOOM = ZOOM_SPEED  # exp(glfw.get_time()*ZOOM_SPEED)
 
             width, height = self.this_window.window_size
