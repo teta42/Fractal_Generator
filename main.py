@@ -9,6 +9,8 @@ import glfw
 # width, height = 800, 600
 
 # ZOOM_SPEED = 1.0 # чем ближе к 1 тем быстрее
+#TODO вынести глобальные переменные в отдельный файл
+
 ZOOM = 1.0
 CENTER = {'x': 0.0, 'y': 0.0}
 MAX_ITERATIONS = 500
