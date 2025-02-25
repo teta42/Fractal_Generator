@@ -3,49 +3,16 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from Shader import Shader_manager
 import numpy as np
-from math import exp
 import glfw
+from settings import *
+import settings
+from control import callback_registration
 
-# width, height = 800, 600
-
-# ZOOM_SPEED = 1.0 # чем ближе к 1 тем быстрее
-#TODO вынести глобальные переменные в отдельный файл
-
-ZOOM = 1.0
-CENTER = {'x': 0.0, 'y': 0.0}
-MAX_ITERATIONS = 500
-ESCAPE_RADIUS = 4.0
-
-WINDOW = None
-
-
-# Функция обратного вызова для обработки событий мыши
-def mouse_callback(window, button, action, mods):
-    if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS:
-        # Получаем координаты курсора в пикселях
-        x, y = glfw.get_cursor_pos(window)
-        width, height = WINDOW.window_size
-
-        CENTER['x'] = CENTER['x'] + (x / width - 0.5) * (3.0 * (width/height) / ZOOM)
-        CENTER['y'] = CENTER['y'] + (0.5 - y / height) * (3.0 / ZOOM)
-
-        print(f"Новый центр комплексной плоскости: x={CENTER['x']}, y={CENTER['y']}")
-
-# Функция обратного вызова для обработки прокрутки
-def scroll_callback(window, xoffset, yoffset):
-    global ZOOM
-    # Нормализуем значение прокрутки
-    ZOOM += yoffset * 0.3 * ZOOM  # Умножаем на коэффициент для уменьшения шага
-    # ZOOM_SPEED = max(-1.0, min(1.0, ZOOM_SPEED))  # Ограничиваем значения между 0 и 1
-    print(f"Текущее значение прокрутки: {ZOOM}")
 
 class MainStream():
     def __init__(self):
         # Создание экземпляра GLFW
         self.this_window = Window()
-        
-        global WINDOW
-        WINDOW = self.this_window
 
         self.shader = Shader_manager()
         
@@ -98,11 +65,8 @@ class MainStream():
         window = self.this_window.window
         
         self.shader.get_uniform()
-        
-        # Регистрация функции обратного вызова
-        glfw.set_mouse_button_callback(window, mouse_callback)
-        # Установка функции обратного вызова для прокрутки
-        glfw.set_scroll_callback(window, scroll_callback)
+
+        callback_registration(self.this_window)
 
         # Основной цикл
         while not glfw.window_should_close(window):
@@ -114,7 +78,7 @@ class MainStream():
 
             width, height = self.this_window.window_size
 
-            self.shader.push_uniform(ZOOM, CENTER, MAX_ITERATIONS, ESCAPE_RADIUS, width, height)
+            self.shader.push_uniform(settings.ZOOM, CENTER, MAX_ITERATIONS, ESCAPE_RADIUS, width, height)
 
             # Привязка VAO
             glBindVertexArray(self.vao)
