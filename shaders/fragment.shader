@@ -69,6 +69,86 @@ dvec2 complexPow(dvec2 z, int power) {
     return result;
 }
 
+
+double expDouble(double x) {
+    bool isNegative = false;
+    if (x < 0.0) {
+        isNegative = true;
+        x = -x;
+    }
+
+    // Разложение в ряд Тейлора: exp(x) ≈ 1 + x + x^2/2! + x^3/3! + ...
+    double result = 1.0;
+    double term = 1.0;
+    const int MAX_ITERATIONS = 50;
+
+    for (int i = 1; i < MAX_ITERATIONS; i++) {
+        term *= x / double(i);
+        result += term;
+        if (term < 1e-15) {
+            break;
+        }
+    }
+
+    return isNegative ? 1.0 / result : result;
+}
+
+// Собственная оптимизированная реализация синуса для double
+double sinDouble(double x) {
+    const double PI = 3.141592653589793;
+    const double TWO_PI = 6.283185307179586;
+    const double HALF_PI = 1.5707963267948966;
+
+    // Приведение x к диапазону [-π, π] через вычитание кратных 2π (быстрее mod)
+    int q = int((x + PI) / TWO_PI);
+    x -= q * TWO_PI;
+
+    // Для x < -π или x > π корректируем диапазон
+    if (x < -PI) x += TWO_PI;
+    else if (x > PI) x -= TWO_PI;
+
+    // Для x > π/2 используем тождество sin(x) = sin(π - x)
+    if (x > HALF_PI) {
+        x = PI - x;
+    } else if (x < -HALF_PI) { // Для x < -π/2: sin(x) = -sin(π + x)
+        x = -PI - x;
+        x = (x > HALF_PI) ? PI - x : x;
+    }
+
+    // Оптимизированное разложение Тейлора (меньше умножений)
+    double x2 = x * x;
+    double x3 = x2 * x;
+    double x5 = x3 * x2;
+    double x7 = x5 * x2;
+
+    // sin(x) ≈ x - x^3/6 + x^5/120 - x^7/5040
+    return x - x3/6.0 + x5/120.0 - x7/5040.0;
+}
+
+// Оптимизированный sinh и cosh с кешированием exp(x)
+void sinhCosinhDouble(double x, out double sinh, out double cosh) {
+    double ex = expDouble(x);
+    double eNegX = 1.0 / ex;
+    sinh = (ex - eNegX) * 0.5;
+    cosh = (ex + eNegX) * 0.5;
+}
+
+// Оптимизированный комплексный синус
+dvec2 complexSin(dvec2 z) {
+    double sinhY, coshY;
+    sinhCosinhDouble(z.y, sinhY, coshY); // Единый вычет для sinh и cosh
+
+    double sinX = sinDouble(z.x);
+    double cosX = sqrt(1.0 - sinX * sinX); // Из тождества sin² + cos² = 1
+
+    return dvec2(
+        sinX * coshY,     // real
+        cosX * sinhY      // imaginary (знак сохраняется)
+    );
+}
+
+
+
 void main() {
     // Нормализованные координаты пикселя в диапазоне [0, 1]
     dvec2 pixelCoord = gl_FragCoord.xy / resolution.xy;
@@ -87,7 +167,7 @@ void main() {
     double zSquared = 0.0; // Квадрат модуля z
     while (iteration < MAX_ITERATIONS) {
         // Вычисление z^2 + c
-        z = complexPow(z,2) + c;
+        z = complexSin(complexPow(z,2)) + c;
 
         // Обновление квадрата модуля z
         zSquared = z.x * z.x + z.y * z.y;
