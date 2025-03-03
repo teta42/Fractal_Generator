@@ -76,6 +76,7 @@ class Shader_manager():
         self.max_itr = glGetUniformLocation(self.shader_program, "MAX_ITERATIONS")
         self.escape_radius = glGetUniformLocation(self.shader_program, "ESCAPE_RADIUS")
         # time_s = glGetUniformLocation(self.shader_program, "time")
+        self.aspectRatio = glGetUniformLocation(self.shader_program, "aspectRatio")
 
     def push_uniform(self, ZOOM, CENTER, MAX_ITERATIONS, ESCAPE_RADIUS, width, height):
         # Установка значений uniform-переменных
@@ -84,6 +85,7 @@ class Shader_manager():
         glUniform2d(self.center, CENTER['x'], CENTER['y'])
         glUniform1i(self.max_itr, MAX_ITERATIONS)
         glUniform1f(self.escape_radius, ESCAPE_RADIUS)
+        glUniform1d(self.aspectRatio, width/height)
         # glUniform1f(time_s, glfw.get_time())
     
     def delete_program(self):
