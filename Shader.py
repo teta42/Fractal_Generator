@@ -1,4 +1,5 @@
 from OpenGL.GL import *
+from settings import vertex_path, fragment_path
 
 class Shader_manager():
     def __init__(self):
@@ -14,8 +15,6 @@ class Shader_manager():
         glUseProgram(self.shader_program)
     
     def _read_shader(self):
-        vertex_path = '../Fractal_Generator/shaders/vertex.shader'
-        fragment_path = '../Fractal_Generator/shaders/fragment.shader'
         try:
             with open(vertex_path, encoding='utf-8') as file:
                 self._vertex_shader = file.read()
