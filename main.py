@@ -97,13 +97,18 @@ class MainStream():
             glfw.poll_events()
          
     def __del__(self):
-        # Очистка
-        glDeleteBuffers(1, np.array([self.vbo], dtype=np.uint32))
-        glDeleteVertexArrays(1, np.array([self.vao], dtype=np.uint32))
-        glDeleteBuffers(1, np.array([self.ebo], dtype=np.uint32))
-        self.shader.delete_program()
-        print(f"Программа работала {glfw.get_time()}")
+        # Очистка только если объекты были созданы
+        if hasattr(self, 'vbo'):
+            glDeleteBuffers(1, [self.vbo])
+        if hasattr(self, 'vao'):
+            glDeleteVertexArrays(1, [self.vao])
+        if hasattr(self, 'ebo'):
+            glDeleteBuffers(1, [self.ebo])
+        if hasattr(self, 'shader'):
+            self.shader.delete_program()
+        print(f"Программа работала {glfw.get_time() if glfw.init() else 0}")
         glfw.terminate()
+
             
 if __name__ == '__main__':
     stream = MainStream()

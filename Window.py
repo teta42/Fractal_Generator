@@ -7,7 +7,9 @@ class Window:
         if not glfw.init():
             raise Exception("Не удалось инициализировать GLFW")
         
-        # Установка флага, не запрещающего изменение размера окна
+        # Настройки контекста OpenGL
+        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
+        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
         glfw.window_hint(glfw.RESIZABLE, glfw.TRUE)
         
         self._create_window(height, width)
