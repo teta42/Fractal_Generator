@@ -1,28 +1,18 @@
 from OpenGL.GL import *
-from settings import vertex_path, fragment_path
+from settings import vertex_path, fragment_path, Accuracy, Version_OpenGL, Formula
 
 class Shader_manager():
     def __init__(self):
         
-        self._read_shader()
+        com = Composer()
         
-        self.vertex_shader = self._compile_shader(self._vertex_shader, GL_VERTEX_SHADER)
-        self.fragment_shader = self._compile_shader(self._fragment_shader, GL_FRAGMENT_SHADER)
+        self.vertex_shader = self._compile_shader(com.vertex_shader, GL_VERTEX_SHADER)
+        self.fragment_shader = self._compile_shader(com.fragment_shader, GL_FRAGMENT_SHADER)
         
         self.shader_program = self._create_shader_program(self.vertex_shader, self.fragment_shader)
         
         # Используем шейдерную программу
         glUseProgram(self.shader_program)
-    
-    def _read_shader(self):
-        try:
-            with open(vertex_path, encoding='utf-8') as file:
-                self._vertex_shader = file.read()
-        
-            with open(fragment_path, encoding='utf-8') as file:
-                self._fragment_shader = file.read()
-        except FileNotFoundError as e:
-            raise RuntimeError(f"Файл шейдера не найден: {e.filename}")
     
     def _create_shader_program(self, vertex_shader_id, fragment_shader_id):
         program = glCreateProgram()
@@ -81,12 +71,19 @@ class Shader_manager():
     def push_uniform(self, ZOOM, CENTER, MAX_ITERATIONS, ESCAPE_RADIUS, width, height):
         # Установка значений uniform-переменных
         glUniform2f(self.resolution, width, height)
-        glUniform1d(self.zoom, ZOOM)
-        glUniform2d(self.center, CENTER['x'], CENTER['y'])
         glUniform1i(self.max_itr, MAX_ITERATIONS)
         glUniform1f(self.escape_radius, ESCAPE_RADIUS)
-        glUniform1d(self.aspectRatio, width/height)
+        glUniform1f(self.aspectRatio, width/height)
         # glUniform1f(time_s, glfw.get_time())
+        
+        if Accuracy == 2:
+            glUniform1d(self.zoom, ZOOM)
+            glUniform2d(self.center, CENTER['x'], CENTER['y'])
+        elif Accuracy == 1:
+            glUniform1f(self.zoom, ZOOM)
+            glUniform2f(self.center, CENTER['x'], CENTER['y'])
+        else:
+            raise ValueError("Accuracy = 1 and 2")
     
     def delete_program(self):
         if self.vertex_shader:
@@ -95,3 +92,31 @@ class Shader_manager():
             glDeleteShader(self.fragment_shader)
         if self.shader_program:
             glDeleteProgram(self.shader_program)
+            
+class Composer():
+    def __init__(self):
+        self._read_shader()
+        
+        if Accuracy == 2:
+            self.fragment_shader = self._changer(self.fragment_shader, ['double', 'dvec2'])
+        elif Accuracy == 1:
+            self.fragment_shader = self._changer(self.fragment_shader, ['float', 'vec2'])
+        else:
+            raise ValueError('Accuracy = 1 and 2')
+    
+    def _changer(self, shader_source: str, accuracy: list) -> str:
+        shader_source = shader_source.replace("[version]", str(Version_OpenGL))
+        shader_source = shader_source.replace("[0]", accuracy[0])
+        shader_source = shader_source.replace("[1]", accuracy[1])
+        shader_source = shader_source.replace("[Formula]", Formula)
+        return shader_source
+    
+    def _read_shader(self):
+        try:
+            with open(vertex_path, encoding='utf-8') as file:
+                self.vertex_shader = file.read()
+        
+            with open(fragment_path, encoding='utf-8') as file:
+                self.fragment_shader = file.read()
+        except FileNotFoundError as e:
+            raise RuntimeError(f"Файл шейдера не найден: {e.filename}")
