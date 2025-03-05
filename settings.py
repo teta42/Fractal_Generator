@@ -10,7 +10,7 @@ fragment_path = os.path.join(os.getcwd(), 'shaders', 'fragment.shader')
 
 Accuracy = 1 # 2(double) 1(float)
 Version_OpenGL = 330 # Accuracy = 2, Version_OpenGL > 400; Accuracy = 1, Version_OpenGL < 400
-Formula = 'tan(complexPow(z,2)) + c'
+Formula = 'complexSin(complexPow(z,2)) + c'
 
 # width, height = 800, 600
 
