@@ -8,9 +8,9 @@ ESCAPE_RADIUS = 4.0
 vertex_path = os.path.join(os.getcwd(), 'shaders', 'vertex.shader')
 fragment_path = os.path.join(os.getcwd(), 'shaders', 'fragment.shader')
 
-Accuracy = 1 # 2(double) 1(float)
-Version_OpenGL = 330 # Accuracy = 2, Version_OpenGL > 400; Accuracy = 1, Version_OpenGL < 400
-Formula = 'complexSin(complexPow(z,2)) + c'
+Accuracy = 2 # 2(double) 1(float)
+Version_OpenGL = 430 # Accuracy = 2, Version_OpenGL > 400; Accuracy = 1, Version_OpenGL < 400
+Formula = 'complexPow(z+complexPow(c,3),2)+c'
 
 # width, height = 800, 600
 
