@@ -33,7 +33,7 @@ out vec4 FragColor;
 }
 
 // Функция для умножения двух комплексных чисел
-[1] complexMultiply([1] z1, [1] z2) {
+[1] cMultiply([1] z1, [1] z2) {
     // Действительная часть: z1.x * z2.x - z1.y * z2.y
     [0] realPart = z1.x * z2.x - z1.y * z2.y;
 
@@ -45,7 +45,7 @@ out vec4 FragColor;
 }
 
 // Функция для возведения комплексного числа в целую степень
-[1] complexPow([1] z, int power) {
+[1] cPow([1] z, int power) {
     // Начальное значение: z^0 = 1 + 0i
     [1] result = [1](1.0, 0.0);
 
@@ -61,9 +61,9 @@ out vec4 FragColor;
         power = -power; // Делаем степень положительной
     }
 
-    // Итеративное возведение в степень с использованием complexMultiply
+    // Итеративное возведение в степень с использованием cMultiply
     for (int i = 0; i < power; i++) {
-        result = complexMultiply(result, z); // Умножаем результат на z
+        result = cMultiply(result, z); // Умножаем результат на z
     }
 
     return result;

@@ -99,15 +99,16 @@ class MainStream():
     def __del__(self):
         # Очистка только если объекты были созданы
         if hasattr(self, 'vbo'):
-            glDeleteBuffers(1, [self.vbo])
+            glDeleteBuffers(1, np.array([self.vbo], dtype=np.uint32))
         if hasattr(self, 'vao'):
-            glDeleteVertexArrays(1, [self.vao])
+            glDeleteVertexArrays(1, np.array([self.vao], dtype=np.uint32))
         if hasattr(self, 'ebo'):
-            glDeleteBuffers(1, [self.ebo])
+            glDeleteBuffers(1, np.array([self.ebo], dtype=np.uint32))
         if hasattr(self, 'shader'):
             self.shader.delete_program()
         print(f"Программа работала {glfw.get_time() if glfw.init() else 0}")
         glfw.terminate()
+
 
             
 if __name__ == '__main__':

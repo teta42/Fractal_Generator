@@ -112,6 +112,8 @@ class Composer():
         shader_source = shader_source.replace("[Formula]", Formula)
         if Accuracy == 1:
             shader_source = shader_source.replace("[trigonometry]", self._read_template('trigonometry'))
+        elif Accuracy == 2:
+            shader_source = shader_source.replace("[trigonometry]", '')
         return shader_source
     
     def _read_shader(self):
