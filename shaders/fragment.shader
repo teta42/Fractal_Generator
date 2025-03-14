@@ -69,9 +69,7 @@ out vec4 FragColor;
     return result;
 }
 
-vec2 complexSin(vec2 z) {
-    return vec2(sin(z.x) * cosh(z.y), cos(z.x) * sinh(z.y));
-}
+[trigonometry]
 
 void main() {
     // Нормализованные координаты пикселя в диапазоне [0, 1]

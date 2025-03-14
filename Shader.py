@@ -1,5 +1,6 @@
 from OpenGL.GL import *
-from settings import vertex_path, fragment_path, Accuracy, Version_OpenGL, Formula
+from settings import vertex_path, template_shader, fragment_path, Accuracy, Version_OpenGL, Formula
+import os
 
 class Shader_manager():
     def __init__(self):
@@ -109,6 +110,8 @@ class Composer():
         shader_source = shader_source.replace("[0]", accuracy[0])
         shader_source = shader_source.replace("[1]", accuracy[1])
         shader_source = shader_source.replace("[Formula]", Formula)
+        if Accuracy == 1:
+            shader_source = shader_source.replace("[trigonometry]", self._read_template('trigonometry'))
         return shader_source
     
     def _read_shader(self):
@@ -120,3 +123,11 @@ class Composer():
                 self.fragment_shader = file.read()
         except FileNotFoundError as e:
             raise RuntimeError(f"Файл шейдера не найден: {e.filename}")
+    
+    def _read_template(self, name: str) -> str:
+        path = os.path.join(template_shader, f'{name}.shader')
+        try:
+            with open(path, encoding='utf-8') as file:
+                return file.read()
+        except FileNotFoundError as e:
+            raise RuntimeError(f"Файл шаблона не найден: {e.filename}")
