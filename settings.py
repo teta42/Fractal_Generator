@@ -1,5 +1,11 @@
 import os
 from check_formula import check_formula
+import glfw
+
+RESIZABLE_WINDOW = glfw.TRUE # glfw.FALSE
+HEIGHT = 600
+WIDTH = 800
+
 
 ZOOM = 1.0
 CENTER = {'x': 0.0, 'y': 0.0}
@@ -18,8 +24,3 @@ Formula = check_formula(Formula1)
 
 if Formula == False:
     raise SyntaxError(f'В вашей формуле {Formula1} ошибка')
-    
-
-# width, height = 800, 600
-
-# ZOOM_SPEED = 1.0 # чем ближе к 1 тем быстрее 

@@ -1,32 +1,31 @@
 import glfw
 from OpenGL.GL import glViewport
+from settings import RESIZABLE_WINDOW, HEIGHT, WIDTH
 
 class Window:
-    def __init__(self, height: int = 600, width: int = 800):
+    def __init__(self):
         # Инициализация GLFW
         if not glfw.init():
             raise Exception("Не удалось инициализировать GLFW")
         
         # Настройки контекста OpenGL
-        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
-        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
-        glfw.window_hint(glfw.RESIZABLE, glfw.TRUE)
+        glfw.window_hint(glfw.RESIZABLE, RESIZABLE_WINDOW)
         
-        self._create_window(height, width)
+        self._create_window(HEIGHT, WIDTH)
         
         # Установка текущего контекста окна
         glfw.make_context_current(self.window)
         
         glfw.set_framebuffer_size_callback(self.window, self._framebuffer_size_callback)
         
-        self.new_height = height
-        self.new_width = width
+        self.new_height = HEIGHT
+        self.new_width = WIDTH
         
         self.glfw = glfw
         
     def _create_window(self, height, width):
         # Создание окна
-        self.window = glfw.create_window(width, height, "Мое первое окно на GLFW", None, None)
+        self.window = glfw.create_window(width, height, "Fractal Generator", None, None)
 
         if not self.window:
             glfw.terminate()
