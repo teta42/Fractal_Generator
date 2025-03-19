@@ -1,7 +1,7 @@
 # Fractal_Generator
 Генератор фракталов на Python и GLSL
 
-[English version](docs/README.en.md)
+[English version](README.en.md)
 
 ---
 
