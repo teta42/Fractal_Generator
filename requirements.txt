@@ -1,0 +1,4 @@
+glfw>=2.8.0
+PyOpenGL>=3.1.9
+PyOpenGL_accelerate>=3.1.9
+numpy>=2.2.4
