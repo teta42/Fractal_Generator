@@ -60,7 +60,7 @@ vec2 cctgh(vec2 z) {
 }
 
 // Функция для вычисления экспоненты комплексного числа
-vec2 cexp(vec2 z) {
+vec2 cExp(vec2 z) {
     float expA = exp(z.x);
     return vec2(expA * cos(z.y), expA * sin(z.y));
 }

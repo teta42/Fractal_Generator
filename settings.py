@@ -3,14 +3,17 @@ import glfw
 
 '''
 Доступные всегда
-abs, sin, cos, tan, asin, acos, atan, sinh, cosh, 
-tanh, cExp, cPow, vec2(Задать комплексное число: vec2(real, imaginary))
+abs, cExp, cPow, vec2(Задать комплексное число: vec2(real, imaginary))
 
 Доступные только при accuracy = 1
-csin, ccos, ctan, casin, cacos, catan, csinh, ccosh, ctanh
+csin, ccos, ctan, casin, cacos, catan, csinh, ccosh, ctanh, (Комплексные тригонометрические функции)
+sin, cos, tan, asin, acos, atan, sinh, cosh, tanh
 '''
 
-Formula = 'cPow(z,2)+c'
+Formula = 'cPow(z,2)+vec2(1,1)'
+
+Accuracy = 1 # 2(double) 1(float)
+Version_OpenGL = 460 # Accuracy = 2, Version_OpenGL > 400
 
 RESIZABLE_WINDOW = glfw.TRUE # glfw.FALSE
 HEIGHT = 600
@@ -21,9 +24,6 @@ ZOOM = 1.0
 CENTER = {'x': 0.0, 'y': 0.0}
 MAX_ITERATIONS = 500
 ESCAPE_RADIUS = 4.0
-
-Accuracy = 2 # 2(double) 1(float)
-Version_OpenGL = 430 # Accuracy = 2, Version_OpenGL > 400
 
 # Formula1 = input('Введите формулу для генерации фрактала: ')
 
